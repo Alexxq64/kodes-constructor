@@ -1,13 +1,12 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// Переменные уровня модуля
 let scene, camera, renderer, controls;
+let testCube; // <-- 1. Сохраняем сам куб, а не только материал
 
 export function initScene() {
     console.log("1. Инициализация сцены...");
 
-    // 1. Создаем фундамент (сцена, камера, рендерер)
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x222222); 
 
@@ -18,18 +17,14 @@ export function initScene() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
-    // 2. Управление мышкой
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; 
     controls.dampingFactor = 0.05;
 
-    // 3. Добавляем свет (вызываем отдельную функцию)
     setupLighting();
-
-    // 4. Добавляем тестовый куб (вызываем отдельную функцию)
     addTestCube();
+    setupUI();    
 
-    // 5. Вставляем холст в HTML
     const container = document.getElementById('canvas-container');
     if (container) {
         container.appendChild(renderer.domElement); 
@@ -37,18 +32,13 @@ export function initScene() {
         console.error("Ошибка: Не найден контейнер #canvas-container в HTML!");
     }
 
-    // 6. Запускаем анимацию
     animate();
 }
 
-// --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
-
 function setupLighting() {
-    // Общий свет
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
     scene.add(ambientLight);
 
-    // Направленный свет (солнце)
     const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
     directionalLight.position.set(5, 5, 5);
     scene.add(directionalLight);
@@ -57,11 +47,36 @@ function setupLighting() {
 function addTestCube() {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshStandardMaterial({ color: 0x00aaff }); 
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    testCube = new THREE.Mesh(geometry, material); // <-- 2. Сохраняем куб
+    scene.add(testCube);
 }
 
-// Функция анимации
+function setupUI() {
+    const buttons = document.querySelectorAll('.color-btn');
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            let newColor = event.target.getAttribute('data-color');
+            
+            if (testCube && newColor) {
+                // Превращаем строку "0xff3333" в число 0xff3333
+                const hexColor = parseInt(newColor, 16); 
+
+                // Создаем новый материал с правильным числовым цветом
+                const newMaterial = new THREE.MeshStandardMaterial({ color: hexColor });
+                
+                // Удаляем старый материал, чтобы не забивать память
+                testCube.material.dispose();
+                
+                // Присваиваем кубу новый материал
+                testCube.material = newMaterial; 
+                
+                console.log("Цвет куба изменен на:", newColor);
+            }
+        });
+    });
+}
+
 function animate() {
     requestAnimationFrame(animate); 
 

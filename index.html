@@ -5,10 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Конструктор Формы</title>
     <style>
-        /* Пока минимум стилей, чтобы 3D занимал весь экран */
-        body { margin: 0; overflow: hidden; }
-        #canvas-container { width: 100vw; height: 100vh; }
+        /* Стили для всей страницы */
+        body { margin: 0; overflow: hidden; font-family: sans-serif; }
+        
+        /* Контейнер для 3D (на весь экран) */
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        
+        /* Панель управления (поверх 3D) */
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10; /* Выше 3D-сцены */
+            background: rgba(255, 255, 255, 0.9); /* Полупрозрачный белый фон */
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .color-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .color-btn:hover { transform: scale(1.1); border-color: #333; }
     </style>
+    
     <script type="importmap">
     {
       "imports": {
@@ -19,7 +46,21 @@
     </script>
 </head>
 <body>
+    <!-- Панель управления -->
+    <div id="ui-panel">
+        <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px;">Выберите цвет:</h3>
+        <div>
+            <!-- Кнопки цветов. data-color хранит hex-код цвета -->
+            <button class="color-btn" style="background-color: #00aaff;" data-color="0x00aaff"></button>
+            <button class="color-btn" style="background-color: #ff3333;" data-color="0xff3333"></button>
+            <button class="color-btn" style="background-color: #33cc33;" data-color="0x33cc33"></button>
+            <button class="color-btn" style="background-color: #333333;" data-color="0x333333"></button>
+        </div>
+    </div>
+
+    <!-- Контейнер для 3D -->
     <div id="canvas-container"></div>
+    
     <script type="module" src="main.js"></script>
 </body>
 </html>

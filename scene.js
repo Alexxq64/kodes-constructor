@@ -1,67 +1,75 @@
-// Мы импортируем библиотеку Three.js, которую подключили в index.html
 import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// Объявляем переменные на уровне модуля, чтобы к ним имели доступ разные функции
-let scene, camera, renderer;
+// Переменные уровня модуля
+let scene, camera, renderer, controls;
 
 export function initScene() {
-    console.log("1. Функция initScene запущена.");
+    console.log("1. Инициализация сцены...");
 
-    // 1. Создаем сцену (это наша "комната", где будут жить 3D-объекты)
+    // 1. Создаем фундамент (сцена, камера, рендерер)
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x222222); // Красим комнату в темно-серый цвет
+    scene.background = new THREE.Color(0x222222); 
 
-    // 2. Создаем камеру (это наши "глаза")
-    // Параметры: угол обзора (45), соотношение сторон (ширина/высота окна), ближняя граница, дальняя граница
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 0, 5); // Ставим камеру в координаты x=0, y=0, z=5 (отходим на 5 шагов назад)
+    camera.position.set(0, 0, 5); 
 
-    // 3. Создаем рендерер (это "художник", который рисует 3D на экране)
-    renderer = new THREE.WebGLRenderer({ antialias: true }); // antialias: true делает края объектов гладкими, без "лесенок"
-    renderer.setSize(window.innerWidth, window.innerHeight); // Задаем размер холста на весь экран
-    renderer.setPixelRatio(window.devicePixelRatio); // Делаем картинку четкой на экранах с высоким разрешением (Retina)
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
 
-    // === ДОБАВЛЯЕМ СВЕТ ===
-    // 1. AmbientLight (Общий свет). Он освещает все объекты равномерно со всех сторон.
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // 0xffffff - белый цвет, 1.5 - интенсивность
-    scene.add(ambientLight);
+    // 2. Управление мышкой
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; 
+    controls.dampingFactor = 0.05;
 
-    // 2. DirectionalLight (Направленный свет). Работает как солнце: светит с одной стороны.
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-    directionalLight.position.set(5, 5, 5); // Ставим "солнце" в координаты x=5, y=5, z=5
-    scene.add(directionalLight);
+    // 3. Добавляем свет (вызываем отдельную функцию)
+    setupLighting();
 
-    // === ДОБАВЛЯЕМ ТЕСТОВЫЙ ОБЪЕКТ (КУБ) ===
-    // 1. Геометрия (форма). BoxGeometry создает куб. Размеры 1x1x1.
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    
-    // 2. Материал (из чего сделан объект). MeshStandardMaterial реагирует на свет.
-    const material = new THREE.MeshStandardMaterial({ color: 0x00aaff }); // Красим куб в голубой цвет
-    
-    // 3. Создаем сам объект (Mesh), объединяя геометрию и материал.
-    const cube = new THREE.Mesh(geometry, material);
-    
-    // 4. Добавляем куб на сцену.
-    scene.add(cube);    
+    // 4. Добавляем тестовый куб (вызываем отдельную функцию)
+    addTestCube();
 
-    // 4. Добавляем холст рендерера на нашу HTML-страницу
+    // 5. Вставляем холст в HTML
     const container = document.getElementById('canvas-container');
     if (container) {
-        container.appendChild(renderer.domElement); // Берем холст, который создал Three.js, и вставляем его в div с id="canvas-container"
+        container.appendChild(renderer.domElement); 
     } else {
         console.error("Ошибка: Не найден контейнер #canvas-container в HTML!");
     }
 
-    // 5. Запускаем анимацию
+    // 6. Запускаем анимацию
     animate();
 }
 
-// Функция анимации. Она будет вызываться браузером 60 раз в секунду
-function animate() {
-    requestAnimationFrame(animate); // Просим браузер вызвать эту функцию снова в следующем кадре
+// --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
 
-    // Пока мы ничего не рисуем внутри сцены, но команда render вызывается
+function setupLighting() {
+    // Общий свет
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+    scene.add(ambientLight);
+
+    // Направленный свет (солнце)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+    directionalLight.position.set(5, 5, 5);
+    scene.add(directionalLight);
+}
+
+function addTestCube() {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshStandardMaterial({ color: 0x00aaff }); 
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+}
+
+// Функция анимации
+function animate() {
+    requestAnimationFrame(animate); 
+
+    if (controls) {
+        controls.update(); 
+    }
+
     if (renderer && scene && camera) {
-        renderer.render(scene, camera); // "Художник" смотрит на "комнату" через "глаза" и рисует картинку
+        renderer.render(scene, camera); 
     }
 }

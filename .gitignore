@@ -1,0 +1,14 @@
+# Зависимости (если появятся)
+node_modules/
+
+# Системные файлы (Windows и Mac)
+.DS_Store
+Thumbs.db
+
+# Логи и кэш
+*.log
+npm-debug.log*
+
+# Настройки редактора (если не хотите шарить их)
+.vscode/
+.idea/
